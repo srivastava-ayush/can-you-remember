@@ -13,13 +13,27 @@ function TileGame() {
   const [clickCount, setClickCount] = useState(0);
   const loseAudio = new Audio(`../public/sfx/roundlose.mp3`);
   const soundEffects = useRef<{ [key: number]: HTMLAudioElement }>({});
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
+  
+  //// Preload soundssssssssss
   useEffect(() => {
     for (let i = 1; i <= 12; i++) {
       soundEffects.current[i] = new Audio(`/sfx/${i}.mp3`);
-      soundEffects.current[i].load(); // Preload sounds
+      soundEffects.current[i].load(); 
     }
   }, []);
+
+  const handleReset = () => {
+    setBlockIsClickable(false);
+    setRandomArr([]);
+    setUserInputArr([]);
+    setClickCount(0);
+    setLevel(1);
+    setTimeout(() => setIsSideBarOpen(true), 800);   
+    setIsPlaying(false);
+  };
 
   const handleClickOnBlock = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!blockIsClickable) {
@@ -61,53 +75,17 @@ function TileGame() {
     setUserInputArr((prev) => [...prev, tileId]);
   };
 
-  // handle clicks on blocks
-
   const handleClickOnStartBtn = async () => {
-    const optionsElement = document.getElementById(
-      "options"
-    ) as HTMLElement | null;
-    if (optionsElement) {
-      optionsElement.style.display = "none";
-    }
+    setIsSideBarOpen(false);
+    setIsPlaying(true);
     setRandomArr([]);
     setUserInputArr([]);
     setBlockIsClickable(false);
     await animateRandomTiles();
     setBlockIsClickable(true);
-  }; //handle start btn
-  //   if (!blockIsClickable) {
-  //     console.log("Not clickable while animating");
-  //     return;
-  //   }
+  }; 
 
-  //   const target = e.target as HTMLDivElement;
-
-  //   if (!target || !target.id) {
-  //     console.error("Invalid target or missing id");
-  //     return;
-  //   }
-  //   const { id } = target;
-
-  //   // add sfx
-
-  //   const audio = soundEffects.current[id];
-
-  //   if (audio) {
-  //     audio.currentTime = 0;
-  //     audio.play();
-  //   }
-  //   target.classList.add("flash");
-  //   setTimeout(() => {
-
-  //     if (document.body.contains(target)) {
-  //       target.classList.remove("flash");
-  //     }
-  //   }, 500);
-
-  //   setUserInputArr((prev) => [...prev, Number(id)]);
-  // };
-
+  //  ya toh win hai ya toh lun hai
   useEffect(() => {
     if (userInputArr.length === randomArr.length && randomArr.length > 0) {
       if (userInputArr.join() === randomArr.join()) {
@@ -119,17 +97,13 @@ function TileGame() {
           setBlockIsClickable(true);
         }, 2000);
       } else {
-        setBlockIsClickable(false);
         loseAudio.play();
+        
         roundOver(false);
-        setLevel(1);
-        setRandomArr([]);
-        setUserInputArr([]);
-        const btn = document.getElementById("options");
-        if (btn) btn.style.display = "block";
+        handleReset()
       }
     }
-  }, [userInputArr]); // decide if win or lose
+  }, [userInputArr]); 
 
   const animatePrevTiles = async (): Promise<void> => {
     setUserInputArr([]);
@@ -145,7 +119,7 @@ function TileGame() {
         );
       }
     }
-  }; // animate previous tiles
+  }; 
 
   const animateRandomTiles = async () => {
     return new Promise<void>((resolve) => {
@@ -165,9 +139,15 @@ function TileGame() {
         }
       }, 500);
     });
-  }; // animate random tiles
+  }; 
 
   const roundOver = (isWin: boolean) => {
+
+    if(!isWin){
+     setIsPlaying(false);
+ 
+    }
+
     const animationClass = isWin ? "win-animate" : "lose-animate";
 
     if (level > highscore) {
@@ -190,12 +170,17 @@ function TileGame() {
         }
       });
     }, 100);
-  }; // handle common round over logic
+  }; 
 
   return (
-    <div className=" min-w-screen p-6 md:p-12 lg:min-h-screen flex flex-col lg:flex-row justify-around items-center gap-10 lg:gap-10">
-      <aside className=" w-full  lg:max-w-[30%] z-99 flex flex-col text-center gap-4">
-        <h1 className="text-xl md:text-6xl text-white text-center">
+    <div className=" min-h-screen min-w-screen p-6 md:p-12 lg:min-h-screen flex flex-col justify-center items-center gap-10 lg:gap-10">
+      
+      {isSideBarOpen &&
+      
+      <aside className=" absolute bg-[#00000099] backdrop-blur-sm min-h-screen  w-full  top-0 left-0 z-99 flex flex-col text-center gap-4">
+       
+       <div className="flex min-h-full justify-center items-center flex-col px-4 py-20 gap-4">
+        <h1 className="text-xl md:text-4xl text-white text-center">
           Remember Tiles Sequence? <br />
         </h1>
         <p className="text-3xl">
@@ -203,8 +188,10 @@ function TileGame() {
           ( Level <span className="italic bg-indigo-800 p-2">{level}</span> )
         </p>
         <p>Your highscore is {highscore} </p>
+
+        {!isPlaying &&
         <div
-          className="flex flex-col  gap-4 justify-center"
+          className="flex flex-col  gap-4 items-center justify-center"
           id="options"
         >
           <div className="w-full flex justify-center">
@@ -221,33 +208,44 @@ function TileGame() {
           <button
             id="start-btn"
             onClick={handleClickOnStartBtn}
-            className="border-3 text-3xl  cursor-pointer bg-indigo-500 p-4 rounded-lg"
+            className="border-3 text-2xl font-black   cursor-pointer bg-gradient-to-br from-indigo-500 via-blue-700 to-blue-500 w-fit py-2 px-6 rounded-lg"
           >
-            Start
+            START
           </button>
+
+      
+
+        </div>}   
+        
+         {/* <button 
+          onClick={handleReset}
+          className="border-3 text-2xl font-black   cursor-pointer bg-gradient-to-br from-indigo-500 via-blue-700 to-blue-500 w-fit py-2 px-6 rounded-lg">Reset</button> */}
+        
         </div>
       </aside>
+      }
 
+  <button onClick={() => setIsSideBarOpen((prev) => !prev)} className="underline underline-offset-4 p-3 z-[9999] absolute top-2 left-2">view settings</button>
       {/* grid-cols-3
     grid-cols-4
     grid-cols-5
   */}
 
-      <div className=" w-full lg:min-w-[55rem]">
+    
         <div
           ref={gridRef}
-          className={`   grid w-full h-auto place-items-center grid-cols-${cols} gap-3 p-3 bg-indigo-400 rounded-lg`}
+          className={`   grid max-w-2xl  place-items-center grid-cols-${cols} gap-2 p-2 bg-indigo-400 rounded-lg`}
         >
           {[...Array(cols * cols)].map((_, i) => (
             <div
               key={i + 1}
               id={(i + 1).toString()}
               onClick={handleClickOnBlock}
-              className="blocks p-10 m-1"
+              className="blocks w-18 h-18 md:w-20 md:h-20 "
             />
           ))}
         </div>
-      </div>
+     
     </div>
   );
 }

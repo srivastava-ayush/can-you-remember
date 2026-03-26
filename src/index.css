@@ -13,8 +13,7 @@ transition: backgorund-color .6s ease-in-out;
 }
 
 .blocks {
-  width: 50%;
-aspect-ratio: 1/1;
+
   background-color: #0A0A0A;
   border-radius: 5px;
   cursor: pointer;
@@ -31,7 +30,7 @@ aspect-ratio: 1/1;
 }
 
 .lose-animate{
-  background-color: #ff3030;
+  background-color: #ff0000;
 }
 
  .op-button{
@@ -53,10 +52,7 @@ border-radius: .5rem;
   transition: all .3s ease;
 }
 
-#start-btn:hover{
 
-  background-color: rgb(51, 15, 255);
-}
 .level-text{
   transition: font-size .2s ease;
 }
