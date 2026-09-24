@@ -1,0 +1,716 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #3a342a;
+  --color-xp-blue: #2f6fd6;
+  --color-xp-deep: #1d4d96;
+  --color-aqua: #29b6cf;
+  --color-mint: #5cc449;
+  --color-coral: #e5554d;
+}
+
+:root {
+  --accent: #2f6fd6;
+  --accent-light: #29b6cf;
+  --accent-faint: rgba(47, 111, 214, 0.3);
+  --ok: #5cc449;
+  --bad: #e5554d;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  background-color: #e6dcc2;
+  font-family: "Source Code Pro", monospace;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ---------- Beige / aqua desktop background ---------- */
+body {
+  background: radial-gradient(
+      circle at 85% -10%,
+      rgba(41, 182, 207, 0.32),
+      transparent 46%
+    ),
+    radial-gradient(
+      circle at 8% 108%,
+      rgba(47, 111, 214, 0.22),
+      transparent 42%
+    ),
+    linear-gradient(180deg, #efe8d2, #e2d7ba);
+}
+
+/* ---------- Game font ---------- */
+.font-arcade {
+  font-family: "Press Start 2P", "VT323", cursive;
+}
+
+/* ---------- LCD display font ---------- */
+.font-lcd {
+  font-family: "Share Tech Mono", "VT323", monospace;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- Title (embossed plastic) ---------- */
+.neon-title {
+  font-family: "Press Start 2P", cursive;
+  color: #1e3a5f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 2px 0 rgba(20, 40, 70, 0.35), 0 0 20px rgba(41, 182, 207, 0.45);
+}
+
+/* ---------- HUD panel (beveled plastic) ---------- */
+.hud-panel {
+  background: linear-gradient(180deg, #f4eee0, #e2d6bb 55%, #d5c7a6);
+  border: 1px solid #fdfaf0;
+  border-radius: 1rem;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -3px 6px rgba(140, 122, 90, 0.28),
+    0 2px 0 #b7a87f, 0 10px 24px rgba(90, 75, 45, 0.22);
+}
+
+/* ---------- Recessed keypad well ---------- */
+.keypad-well {
+  background: linear-gradient(180deg, #b3a47f, #cfc19f 35%, #c3b48e);
+  border: 1px solid #93845f;
+  border-radius: 1.35rem;
+  box-shadow: inset 0 3px 10px rgba(70, 55, 25, 0.38),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ---------- Tiles (calculator keys) ---------- */
+.blocks {
+  background: linear-gradient(180deg, #f8f3e5, #e0d4b5 55%, #cfc19c);
+  border: 1px solid #b2a477;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s ease, border-color 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease-in;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 3px rgba(150, 130, 90, 0.28), 0 3px 0 #a1936a,
+    0 5px 8px rgba(80, 65, 35, 0.22);
+  user-select: none;
+}
+.blocks:hover {
+  border-color: rgba(41, 182, 207, 0.7);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 3px rgba(150, 130, 90, 0.28), 0 4px 0 #a1936a,
+    0 7px 12px rgba(80, 65, 35, 0.25);
+}
+.blocks:active {
+  transform: scale(0.94);
+  box-shadow: inset 0 2px 5px rgba(70, 55, 25, 0.32),
+    0 1px 0 #a1936a;
+}
+.tile-ready {
+  border-color: rgba(63, 156, 178, 0.55);
+}
+.tile-ready:hover {
+  transform: scale(1.05) rotate(1deg);
+}
+
+/* ---------- Flash (sequence playback) - lit white ---------- */
+.flash {
+  background: #ffffff !important;
+  border-color: #d8f6ff !important;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.95),
+    inset 0 0 10px rgba(190, 235, 255, 0.85) !important;
+  transform: scale(1.06);
+  animation: flash-pop 0.5s ease;
+}
+@keyframes flash-pop {
+  0% {
+    transform: scale(0.85);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- User correct tap - glossy green key ---------- */
+.tap-green {
+  background: linear-gradient(180deg, #a5f08a, #5cc449 55%, #3e9a36) !important;
+  border-color: #2f7d2c !important;
+  box-shadow: inset 0 1px 0 #e4ffd8, 0 3px 0 #266a24,
+    0 0 14px rgba(90, 210, 90, 0.55) !important;
+}
+
+/* ---------- Tile press feedback (player click) ---------- */
+.press-pop {
+  animation: press-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes press-pop {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Win / Lose key flash ---------- */
+.win-animate {
+  background: linear-gradient(180deg, #a5f08a, #5cc449 55%, #3e9a36) !important;
+  border-color: #2f7d2c !important;
+  box-shadow: inset 0 1px 0 #e4ffd8, 0 3px 0 #266a24,
+    0 0 16px rgba(90, 210, 90, 0.6) !important;
+  animation: glow-pulse 0.9s ease;
+}
+.lose-animate {
+  background: linear-gradient(180deg, #ff9b93, #e5554d 55%, #bd2f29) !important;
+  border-color: #9c221e !important;
+  box-shadow: inset 0 1px 0 #ffd8d4, 0 3px 0 #8c1f1b,
+    0 0 16px rgba(230, 80, 70, 0.6) !important;
+  animation: shake-tile 0.45s ease;
+}
+@keyframes glow-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes shake-tile {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ---------- Screen shake on mistake (body class) ---------- */
+body.shake-screen {
+  animation: screen-shake 0.5s ease;
+}
+@keyframes screen-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-10px, 6px);
+  }
+  40% {
+    transform: translate(10px, -6px);
+  }
+  60% {
+    transform: translate(-8px, -4px);
+  }
+  80% {
+    transform: translate(8px, 4px);
+  }
+}
+
+/* ---------- LCD number chip (boombox display) ---------- */
+.lcd-chip {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  min-width: 3rem;
+  text-align: center;
+  background: linear-gradient(180deg, #0f2f2c, #153d37 60%, #12372f);
+  border: 1px solid #0a1f1e;
+  border-radius: 0.45rem;
+  color: #aaffb0;
+  font-family: "Share Tech Mono", "VT323", monospace;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px rgba(120, 255, 150, 0.7);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.lcd-aqua {
+  color: #7fe9ff;
+  text-shadow: 0 0 8px rgba(127, 233, 255, 0.7);
+}
+
+/* ---------- Number display (standout bezel screen) ---------- */
+.number-display {
+  font-family: "Share Tech Mono", "VT323", monospace;
+  font-size: clamp(2.2rem, 9vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+  color: #aaffb0;
+  text-shadow: 0 0 12px rgba(120, 255, 150, 0.75);
+  background: linear-gradient(180deg, #0d2b26, #123b34 55%, #0f332c);
+  padding: 1.1rem 1.6rem;
+  min-width: 13rem;
+  text-align: center;
+  border: 5px solid #9c8d67;
+  border-radius: 0.85rem;
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.65),
+    inset 0 -2px 0 rgba(160, 255, 180, 0.08), 0 6px 0 #7d7050,
+    0 16px 30px rgba(60, 45, 20, 0.4);
+}
+
+/* ---------- Countdown timer ---------- */
+.time-left {
+  font-family: "Share Tech Mono", "VT323", monospace;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  color: #1b4f8a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.time-left.urgent {
+  color: #d5453c;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  animation: time-urgent 0.6s steps(2) infinite;
+}
+@keyframes time-urgent {
+  50% {
+    opacity: 0.45;
+  }
+}
+.timer-track {
+  width: 100%;
+  height: 8px;
+  background: #9c8d67;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #8c7d58;
+  box-shadow: inset 0 2px 4px rgba(60, 50, 25, 0.5);
+}
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #a5f08a, #5cc449 55%, #3e9a36);
+  transition: width 0.1s linear;
+}
+.timer-fill.low {
+  background: linear-gradient(180deg, #ff9b93, #e5554d 55%, #bd2f29);
+}
+
+/* ---------- Floating score popup ---------- */
+.score-popup {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.7rem;
+  text-shadow: 0 1px 0 rgba(20, 40, 70, 0.5), 0 0 10px rgba(41, 182, 207, 0.7);
+  animation: float-up 0.8s ease-out forwards;
+  white-space: nowrap;
+}
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20%) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -60%) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -200%) scale(1);
+  }
+}
+
+/* ---------- Combo badge ---------- */
+.combo-badge {
+  font-family: "Press Start 2P", cursive;
+  color: #0a8ea8;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 12px rgba(41, 182, 207, 0.6);
+  animation: combo-beat 0.6s ease infinite;
+}
+@keyframes combo-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* ---------- Hearts ---------- */
+.heart {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 2px 2px rgba(80, 50, 30, 0.35));
+  transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+  display: inline-block;
+}
+.heart.lost {
+  opacity: 0.25;
+  transform: scale(0.8);
+  filter: drop-shadow(0 1px 1px rgba(80, 50, 30, 0.2)) grayscale(0.9);
+}
+.heart.lose-pop {
+  animation: heart-lose 0.45s ease;
+}
+@keyframes heart-lose {
+  0% {
+    transform: scale(1.6) rotate(-12deg);
+  }
+  100% {
+    transform: scale(0.8) rotate(0deg);
+  }
+}
+
+/* ---------- Progress bar (recessed groove, mint fill) ---------- */
+.progress-track {
+  width: 100%;
+  height: 14px;
+  background: #9c8d67;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #8c7d58;
+  box-shadow: inset 0 2px 4px rgba(60, 50, 25, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #a5f08a, #5cc449 55%, #3e9a36);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: width 0.25s ease;
+}
+
+/* ---------- Option buttons (keycaps) ---------- */
+.op-button {
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.6rem;
+  border: 1px solid #a99a70;
+  border-radius: 0.5rem;
+  padding: 0.85rem 0.9rem;
+  margin: 4px;
+  cursor: pointer;
+  color: var(--ink);
+  background: linear-gradient(180deg, #f8f3e5, #e0d4b5 55%, #ccbc96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 2px rgba(150, 130, 90, 0.25), 0 2px 0 #8f815d;
+  transition: all 0.2s ease;
+}
+.op-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(41, 182, 207, 0.7);
+}
+.op-button:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(70, 55, 25, 0.3);
+}
+.op-button.active {
+  background: linear-gradient(180deg, #5aa8ff, #2f6fd6 55%, #2459b0);
+  color: #fff;
+  border-color: #1c4488;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 0 #1c4488;
+}
+
+/* ---------- XP glossy blue button ---------- */
+.xp-btn {
+  background: linear-gradient(180deg, #7cc2ff, #2f6fd6 55%, #2458a8);
+  color: #fff;
+  border: 1px solid #1d4d96;
+  border-radius: 0.7rem;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.22), 0 3px 0 #1d4d96,
+    0 8px 18px rgba(45, 90, 150, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.xp-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.xp-btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), 0 1px 0 #1d4d96;
+}
+.xp-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Start button ---------- */
+#start-btn {
+  transition: all 0.3s ease;
+  animation: xp-pulse 1.8s ease-in-out infinite;
+}
+#start-btn:hover {
+  letter-spacing: 0.2em;
+  filter: brightness(1.2);
+  transform: scale(1.06);
+}
+@keyframes xp-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.22), 0 3px 0 #1d4d96,
+      0 0 12px rgba(41, 182, 207, 0.4);
+  }
+  50% {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.22), 0 3px 0 #1d4d96,
+      0 0 34px rgba(41, 182, 207, 0.85);
+  }
+}
+
+/* ---------- Slide-in overlay ---------- */
+.slide-overlay {
+  animation: overlay-slide 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes overlay-slide {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* ---------- Level clear overlay (Frutiger Aero sky) ---------- */
+.clear-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+      circle at 50% 22%,
+      rgba(150, 240, 170, 0.95),
+      rgba(197, 245, 213, 0.6) 48%,
+      #d9f2dd 75%
+    );
+  backdrop-filter: blur(10px);
+  opacity: 1;
+  animation: overlay-in 0.45s ease;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+  overflow: hidden;
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.clear-overlay::before,
+.clear-overlay::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0) 62%
+  );
+  animation: bubble-rise 14s linear infinite;
+  pointer-events: none;
+}
+.clear-overlay::before {
+  width: 90px;
+  height: 90px;
+  left: 14%;
+  bottom: -120px;
+}
+.clear-overlay::after {
+  width: 48px;
+  height: 48px;
+  right: 18%;
+  bottom: -120px;
+  animation-duration: 10s;
+}
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-110vh);
+  }
+}
+.clear-overlay.fading {
+  opacity: 0;
+}
+.clear-overlay .kicker {
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.65rem;
+  letter-spacing: 0.65em;
+  color: #1b4f8a;
+  margin-bottom: 1.8rem;
+  animation: kicker-in 0.9s ease-out forwards;
+  opacity: 0;
+}
+.clear-overlay .big-text {
+  font-family: "Press Start 2P", cursive;
+  font-size: clamp(1.4rem, 6vw, 3.4rem);
+  color: #0e2f5e;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.9),
+    0 0 20px rgba(60, 200, 110, 0.7);
+  display: flex;
+  gap: 0.06em;
+}
+.clear-overlay .big-text span {
+  display: inline-block;
+  opacity: 0;
+  animation: letter-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.clear-overlay .accent-line {
+  width: 0;
+  height: 3px;
+  margin-top: 2rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #4fc97f,
+    transparent
+  );
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(60, 200, 110, 0.85);
+  animation: line-grow 0.9s ease 0.35s forwards;
+}
+@keyframes kicker-in {
+  from {
+    opacity: 0;
+    letter-spacing: 1.2em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.65em;
+  }
+}
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) scale(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes line-grow {
+  to {
+    width: min(26rem, 70vw);
+  }
+}
+
+/* ---------- Game over panel ---------- */
+.gameover-in {
+  animation: gameover-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes gameover-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Confetti ---------- */
+.confetti-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti {
+  position: absolute;
+  top: -12px;
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(-10px) rotate(0deg) scale(1);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(110vh) rotate(720deg) scale(0.6);
+  }
+}
+
+/* ---------- Misc ---------- */
+.text-glow-blue {
+  color: #5fe0ff;
+  text-shadow: 0 0 8px rgba(95, 224, 255, 0.7),
+    0 1px 0 rgba(20, 40, 70, 0.5);
+}
+.text-glow-red {
+  color: #f04a41;
+  text-shadow: 0 2px 0 rgba(120, 20, 15, 0.45),
+    0 0 14px rgba(240, 74, 65, 0.65);
+}
+.rounded-tile {
+  border-radius: 0.9rem;
+}
+.glass-btn {
+  background: linear-gradient(180deg, #fcf9f0, #e8dfc4);
+  border: 1px solid #b8a97f;
+  border-radius: 0.6rem;
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 0 #a89a73,
+    0 4px 8px rgba(80, 65, 35, 0.18);
+  transition: all 0.2s ease;
+}
+.glass-btn:hover {
+  border-color: rgba(41, 182, 207, 0.7);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 0 #a89a73,
+    0 0 14px rgba(41, 182, 207, 0.4);
+}
+
+/* ---------- Input fields ---------- */
+.input-field {
+  width: 100%;
+  background: #fffdf6;
+  border: 1px solid #b8a97f;
+  border-radius: 0.45rem;
+  padding: 0.6rem 0.8rem;
+  color: var(--ink);
+  font-family: "Source Code Pro", monospace;
+  box-shadow: inset 0 2px 4px rgba(90, 70, 30, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.5);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input-field::placeholder {
+  color: rgba(56, 50, 42, 0.35);
+}
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: inset 0 2px 4px rgba(90, 70, 30, 0.12),
+    0 0 0 3px rgba(47, 111, 214, 0.22);
+}
