@@ -25,7 +25,7 @@ Set `DATABASE_URL` in `backend/.env` to your PostgreSQL connection string. Run t
 npm run dev --prefix frontend
 ```
 
-Open `http://localhost:3000`. Next.js proxies `/api/*` to `http://localhost:3001` (override with `API_ORIGIN` in `frontend/.env.local` if needed). For a production deployment, set the API origin at frontend build time and serve the API behind HTTPS. Set `DATABASE_URL` and `NODE_ENV=production` for the backend.
+Open `http://localhost:3000`. Next.js proxies `/api/*` to `http://localhost:3001` in development and to `https://can-you-remember.onrender.com` in production. Override with `API_ORIGIN` in `frontend/.env.local` if needed. For a production deployment, serve both apps over HTTPS and set `DATABASE_URL` and `NODE_ENV=production` for the backend.
 
 ## API
 
