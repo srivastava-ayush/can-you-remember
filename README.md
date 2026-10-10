@@ -37,7 +37,7 @@ Open `http://localhost:3000`. Next.js proxies `/api/*` to `http://localhost:3001
 | POST | `/api/auth/login` | `{ name, password }` |
 | POST | `/api/auth/guest` | Create a guest player |
 | POST | `/api/auth/logout` | Revoke the current session |
-| GET | `/api/leaderboard` | Top 100 best scores per player and game; optional `?game=Tile` or `?game=Number` |
+| GET | `/api/leaderboard` | Top 100 best scores per player and game; `?game=Tile` or `?game=Number`, `?period=all` or `?period=weekly` (current UTC week) |
 | POST | `/api/scores` | Authenticated `{ game, score, level }` |
 
 Sessions use an HTTP-only, SameSite cookie; only a hash of each token is stored. Passwords are hashed with Bun's password API. Scores are submitted by the client on completed levels, so the leaderboard is intended for casual play rather than cheat-resistant competition.

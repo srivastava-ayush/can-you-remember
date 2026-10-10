@@ -108,7 +108,9 @@ app.post("/api/auth/logout", async (c) => {
 
 app.get("/api/leaderboard", async (c) => {
   const game = c.req.query("game");
+  const period = c.req.query("period") ?? "all";
   if (game && game !== "Tile" && game !== "Number") return c.json({ error: "Invalid game." }, 400);
+  if (period !== "all" && period !== "weekly") return c.json({ error: "Invalid period." }, 400);
   const rows = await db<{
     id: string; name: string; game: "Tile" | "Number"; score: number; level: number; date: string;
   }[]>`
@@ -119,6 +121,7 @@ app.get("/api/leaderboard", async (c) => {
         s.created_at
       FROM scores s JOIN players p ON p.id = s.player_id
       WHERE ${game ? db`s.game = ${game}` : db`TRUE`}
+        AND ${period === "weekly" ? db`s.created_at >= (date_trunc('week', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')` : db`TRUE`}
       ORDER BY s.player_id, s.game, s.score DESC, s.level DESC, s.created_at ASC
     ) ranked
     ORDER BY score DESC, level DESC, created_at ASC LIMIT 100
@@ -142,6 +145,7 @@ app.post("/api/scores", async (c) => {
     WHERE NOT EXISTS (
       SELECT 1 FROM scores
       WHERE player_id = ${player.id} AND game = ${game} AND score >= ${score as number}
+        AND created_at >= (date_trunc('week', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')
     )
     RETURNING id::text
   `;

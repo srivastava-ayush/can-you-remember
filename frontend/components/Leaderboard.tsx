@@ -6,32 +6,33 @@ import { usePlayer } from "./PlayerProvider";
 
 const MEDALS = ["01", "02", "03"];
 
-type Filter = "All" | GameName;
+type Period = "all" | "weekly";
 
-function Leaderboard() {
+function Leaderboard({ initialGame = "Tile" }: { initialGame?: GameName }) {
   const { playerName } = usePlayer();
-  const [filter, setFilter] = useState<Filter>("All");
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [game, setGame] = useState<GameName>(initialGame);
+  const [period, setPeriod] = useState<Period>("all");
+  const [result, setResult] = useState<{ key: string; entries: LeaderboardEntry[]; error: string | null }>({ key: "", entries: [], error: null });
+  const queryKey = `${game}:${period}`;
+  const loading = result.key !== queryKey;
+  const rows = loading ? [] : result.entries;
+  const error = loading ? null : result.error;
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/leaderboard", { signal: controller.signal })
+    fetch(`/api/leaderboard?game=${game}&period=${period}`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Could not load rankings.");
         return response.json();
       })
-      .then((data: { entries: LeaderboardEntry[] }) => setEntries(data.entries))
-      .catch((error) => { if (!controller.signal.aborted) setError(error.message); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      .then((data: { entries: LeaderboardEntry[] }) => {
+        if (!controller.signal.aborted) setResult({ key: queryKey, entries: data.entries, error: null });
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) setResult({ key: queryKey, entries: [], error: error.message });
+      });
     return () => controller.abort();
-  }, []);
-
-  const rows =
-    filter === "All"
-      ? entries
-      : entries.filter((e) => e.game === filter);
+  }, [game, period, queryKey]);
 
   return (
     <div className="min-h-screen min-w-screen p-6 md:p-12 flex flex-col justify-center items-center gap-8 z-10">
@@ -41,7 +42,7 @@ function Leaderboard() {
           LEADERBOARD
         </h1>
         <p className="mt-5 inline-block bg-[#e9e5da] border border-[#d8d3c7] text-ink font-arcade text-[0.55rem] md:text-[0.6rem] px-3 py-1.5 tracking-widest">
-          LIVE RANKINGS · BEST SCORE PER GAME
+          LIVE RANKINGS · {period === "weekly" ? "CURRENT UTC WEEK" : "ALL TIME"}
         </p>
       </div>
 
@@ -51,36 +52,41 @@ function Leaderboard() {
         </p>
       )}
 
-      <div className="flex justify-center gap-2">
-        {(["All", "Tile", "Number"] as Filter[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`op-button text-[0.6rem] ${
-              filter === f ? "active" : ""
-            }`}
-          >
-            {f.toUpperCase()}
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full max-w-2xl border-b border-ink/15 pb-5">
+        <div className="flex flex-col items-center sm:items-start gap-2">
+          <span className="section-index">CHOOSE GAME</span>
+          <div className="flex" aria-label="Game rankings">
+            {(["Tile", "Number"] as GameName[]).map((value) => (
+              <button key={value} type="button" onClick={() => setGame(value)} aria-pressed={game === value} className={`op-button text-[0.6rem] ${game === value ? "active" : ""}`}>
+                {value.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col items-center sm:items-end gap-2">
+          <span className="section-index">TIME FRAME</span>
+          <div className="flex" aria-label="Ranking period">
+            {(["all", "weekly"] as Period[]).map((value) => (
+              <button key={value} type="button" onClick={() => setPeriod(value)} aria-pressed={period === value} className={`op-button text-[0.6rem] ${period === value ? "active" : ""}`}>
+                {value === "all" ? "ALL TIME" : "THIS WEEK"}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="hud-panel w-full max-w-2xl overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left">
+        <table className="w-full min-w-[420px] text-left">
           <thead>
             <tr className="border-b border-ink/10 text-ink/60 font-arcade text-[0.55rem] tracking-wider">
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">PLAYER</th>
-              <th className="px-4 py-3">GAME</th>
               <th className="px-4 py-3 text-right">LEVEL</th>
               <th className="px-4 py-3 text-right">SCORE</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((entry, idx) => {
-              const rowIndex = rows.findIndex(
-                (e) => e.id === entry.id
-              );
               const isMe =
                 playerName !== null &&
                 entry.name.toLowerCase() === playerName.toLowerCase();
@@ -96,10 +102,10 @@ function Leaderboard() {
                   }`}
                 >
                   <td className="px-4 py-3 font-arcade text-sm">
-                    {rowIndex < 3 ? (
-                      <span title={`Rank ${rowIndex + 1}`}>{MEDALS[rowIndex]}</span>
+                    {idx < 3 ? (
+                      <span title={`Rank ${idx + 1}`}>{MEDALS[idx]}</span>
                     ) : (
-                      <span className="text-ink/60">{rowIndex + 1}</span>
+                      <span className="text-ink/60">{idx + 1}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -112,17 +118,6 @@ function Leaderboard() {
                       {isMe && <span className="text-xp-blue text-xs"> (you)</span>}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-block text-[0.6rem] font-arcade px-2 py-1 rounded-md ${
-                        entry.game === "Tile"
-                          ? "bg-[#e9e5da] text-ink"
-                          : "bg-ink/10 text-ink/70"
-                      }`}
-                    >
-                      {entry.game.toUpperCase()}
-                    </span>
-                  </td>
                   <td className="px-4 py-3 text-right text-ink/70">
                     {entry.level}
                   </td>
@@ -132,8 +127,8 @@ function Leaderboard() {
             })}
             {(loading || error || rows.length === 0) && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-ink/60">
-                  {loading ? "Loading rankings..." : error ?? "No entries yet. Be the first to play."}
+                <td colSpan={4} className="px-4 py-8 text-center text-ink/60">
+                  {loading ? "Loading rankings..." : error ?? `No ${period === "weekly" ? "scores this week" : "scores yet"} for ${game.toLowerCase()}. Be the first to play.`}
                 </td>
               </tr>
             )}

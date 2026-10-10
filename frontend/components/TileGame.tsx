@@ -624,7 +624,7 @@ function TileGame() {
               ↻ PLAY AGAIN
             </button>
             <Link
-              href="/leaderboard"
+              href="/leaderboard?game=Tile"
               className="leaderboard-fire-btn font-arcade text-xs px-6 py-3 no-underline"
             >
               <span>VIEW LEADERBOARD ↗</span>

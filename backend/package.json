@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch index.ts",
+    "build": "bun build index.ts --target=bun --minify --outdir=dist",
     "start": "bun index.ts",
+    "start:prod": "bun dist/index.js",
     "migrate": "bun migrate.ts",
     "check": "tsc -p tsconfig.json"
   },

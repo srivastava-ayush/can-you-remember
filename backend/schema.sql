@@ -27,3 +27,4 @@ CREATE TABLE IF NOT EXISTS scores (
 );
 CREATE INDEX IF NOT EXISTS scores_rank_idx ON scores (score DESC, level DESC, created_at ASC);
 CREATE INDEX IF NOT EXISTS scores_player_game_idx ON scores (player_id, game);
+CREATE INDEX IF NOT EXISTS scores_game_created_idx ON scores (game, created_at DESC);
