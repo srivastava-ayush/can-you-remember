@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { usePlayer } from "./PlayerProvider";
+import SiteHeader from "./SiteHeader";
 
-const MAX_LIVES = 3;
 const CLEAR_DELAY = 650;
 
 const memorizeMs = (level: number) => 2500 + level * 500;
@@ -15,9 +16,11 @@ function NumberGame() {
   if (isGameOn) return <Game onExit={() => setIsGameOn(false)} bestLevel={bestLevel} onNewBest={setBestLevel} />;
 
   return (
-    <div className="min-h-screen min-w-screen p-6 flex flex-col justify-center items-center gap-8 z-10">
+    <div className="relative min-h-screen min-w-screen p-6 flex flex-col justify-center items-center gap-8 z-10">
+      <div className="absolute top-0 inset-x-0 z-20"><SiteHeader /></div>
       <div className="text-center">
-        <h1 className="neon-title text-xl md:text-4xl leading-relaxed">
+        <span className="section-index block mb-5">02 / NUMERIC MEMORY</span>
+        <h1 className="neon-title text-4xl md:text-6xl leading-relaxed">
           NUMBER
           <br />
           GAME
@@ -29,7 +32,7 @@ function NumberGame() {
           onClick={() => setIsGameOn(true)}
           className="xp-btn font-arcade text-sm py-3 px-6"
         >
-          ▶ START THE GAME
+          START THE GAME →
         </button>
         <div className="text-ink text-sm font-arcade">
           BEST: <span className="font-lcd lcd-chip text-base">{bestLevel}</span>
@@ -58,6 +61,7 @@ function Game({
   bestLevel: number;
   onNewBest: Dispatch<SetStateAction<number>>;
 }) {
+  const { submitScore, scoreError } = usePlayer();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [randomNumberSequence, setRandomNumberSequence] = useState<number[]>(
     () => generateSequence(2)
@@ -65,7 +69,6 @@ function Game({
   const [userInput, setUserInput] = useState("");
   const [phase, setPhase] = useState<"memorize" | "guess">("memorize");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
-  const [lives, setLives] = useState(MAX_LIVES);
   const [timeLeft, setTimeLeft] = useState(() => memorizeMs(1));
   const [cleared, setCleared] = useState({
     active: false,
@@ -93,18 +96,11 @@ function Game({
     phase === "memorize" && status === "idle" && !gameOver && !cleared.active;
 
   const fail = () => {
-    const remaining = lives - 1;
-    setLives(remaining);
     setStatus("wrong");
     loseAudio.current?.play().catch(() => undefined);
     document.body.classList.add("shake-screen");
     setTimeout(() => document.body.classList.remove("shake-screen"), 550);
-
-    if (remaining <= 0) {
-      setTimeout(() => setGameOver(true), 1200);
-    } else {
-      setTimeout(() => startRound(1), 1500);
-    }
+    setTimeout(() => setGameOver(true), 1200);
   };
 
   useEffect(() => {
@@ -138,7 +134,6 @@ function Game({
 
   const restart = () => {
     setGameOver(false);
-    setLives(MAX_LIVES);
     startRound(1);
   };
 
@@ -146,6 +141,7 @@ function Game({
     if (userInput === randomNumberSequence.join("")) {
       const next = currentLevel + 1;
       onNewBest((b) => Math.max(b, currentLevel));
+      void submitScore("Number", currentLevel * 100, currentLevel);
       setStatus("correct");
       winAudio.current?.play().catch(() => undefined);
 
@@ -166,7 +162,7 @@ function Game({
   };
 
   return (
-    <div className="relative min-h-screen min-w-screen p-6 flex flex-col justify-center items-center gap-6 z-10">
+    <div className="game-stage relative min-h-screen min-w-screen p-6 flex flex-col justify-center items-center gap-6 z-10">
       {/* ---------------- Level clear overlay ---------------- */}
       {cleared.active && (
         <div className={`clear-overlay ${cleared.fading ? "fading" : ""}`}>
@@ -189,12 +185,12 @@ function Game({
 
       {/* ---------------- Game over overlay ---------------- */}
       {gameOver && (
-        <aside className="absolute bg-[#ece4cd]/92 backdrop-blur-xl min-h-screen min-w-full top-0 left-0 z-40 flex flex-col items-center justify-center px-4 text-center gameover-in">
+        <aside className="absolute bg-[#f6f4ee]/95 backdrop-blur-xl min-h-screen min-w-full top-0 left-0 z-40 flex flex-col items-center justify-center px-4 text-center gameover-in">
           <h2 className="font-arcade text-3xl md:text-5xl text-glow-red">
             GAME OVER
           </h2>
           <div className="hud-panel mt-8 px-10 py-8 flex flex-col items-center gap-4">
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 gap-8">
               <div>
                 <span className="text-[0.6rem] text-ink/70 font-arcade block mb-2">
                   LEVEL
@@ -209,21 +205,20 @@ function Game({
                   {bestLevel}
                 </span>
               </div>
-              <div>
-                <span className="text-[0.6rem] text-ink/70 font-arcade block mb-2">
-                  LIVES
-                </span>
-                <span className="font-lcd lcd-chip text-lg">
-                  {lives > 0 ? lives : 0}
-                </span>
-              </div>
             </div>
+            {scoreError && <p role="alert" className="feedback-wrong text-xs">{scoreError}</p>}
             <button
               onClick={restart}
               className="xp-btn text-lg font-arcade w-fit py-3 px-8 mt-2"
             >
               ↻ PLAY AGAIN
             </button>
+            <Link
+              href="/leaderboard"
+              className="leaderboard-fire-btn font-arcade text-xs px-6 py-3 no-underline"
+            >
+              <span>VIEW LEADERBOARD ↗</span>
+            </Link>
             <button
               onClick={onExit}
               className="text-ink/60 hover:text-ink underline underline-offset-4 text-xs font-arcade cursor-pointer mt-1"
@@ -255,27 +250,10 @@ function Game({
             </span>
             <span className="font-lcd lcd-chip text-base">{sequenceLength}</span>
           </div>
-          <div>
-            <span className="text-[0.6rem] font-bold tracking-widest text-ink/70 block mb-1">
-              LIVES
-            </span>
-            <div className="flex gap-1">
-              {Array.from({ length: MAX_LIVES }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`heart ${i >= lives ? "lost" : ""} ${
-                    i === lives - 1 && lives < MAX_LIVES ? "lose-pop" : ""
-                  }`}
-                >
-                  ❤️
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Number display (standout bezel screen) */}
-        <div className="number-display">
+        <div key={`${currentLevel}-${phase}`} className="number-display cinematic-display">
           {phase === "memorize"
             ? randomNumberSequence.join("")
             : randomNumberSequence.map(() => "·").join("")}
@@ -320,7 +298,7 @@ function Game({
           </>
         )}
 
-        <p className="text-ink/70 text-xs font-arcade">
+        <p className={`text-xs font-arcade ${status === "correct" ? "feedback-correct" : status === "wrong" ? "feedback-wrong" : "text-ink/70"}`}>
           {phase === "memorize"
             ? "MEMORIZE IT!"
             : status === "correct"

@@ -1,30 +1,47 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { demoLeaderboard, GameName } from "@/lib/leaderboardData";
+import { useEffect, useState } from "react";
+import { type GameName, type LeaderboardEntry } from "@/lib/leaderboardData";
 import { usePlayer } from "./PlayerProvider";
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+const MEDALS = ["01", "02", "03"];
 
 type Filter = "All" | GameName;
 
 function Leaderboard() {
   const { playerName } = usePlayer();
   const [filter, setFilter] = useState<Filter>("All");
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/leaderboard", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Could not load rankings.");
+        return response.json();
+      })
+      .then((data: { entries: LeaderboardEntry[] }) => setEntries(data.entries))
+      .catch((error) => { if (!controller.signal.aborted) setError(error.message); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, []);
 
   const rows =
     filter === "All"
-      ? demoLeaderboard
-      : demoLeaderboard.filter((e) => e.game === filter);
+      ? entries
+      : entries.filter((e) => e.game === filter);
 
   return (
     <div className="min-h-screen min-w-screen p-6 md:p-12 flex flex-col justify-center items-center gap-8 z-10">
       <div className="text-center">
-        <h1 className="neon-title text-2xl md:text-4xl leading-relaxed">
+        <span className="section-index block mb-5">THE MEMORY ARCADE / RANKINGS</span>
+        <h1 className="neon-title text-4xl md:text-6xl leading-relaxed">
           LEADERBOARD
         </h1>
-        <p className="mt-5 inline-block bg-xp-blue/15 border border-xp-blue/40 text-xp-blue font-arcade text-[0.55rem] md:text-[0.6rem] px-3 py-1.5 rounded-full tracking-widest">
-          DEMO DATA · BACKEND COMING SOON
+        <p className="mt-5 inline-block bg-[#e9e5da] border border-[#d8d3c7] text-ink font-arcade text-[0.55rem] md:text-[0.6rem] px-3 py-1.5 tracking-widest">
+          LIVE RANKINGS · BEST SCORE PER GAME
         </p>
       </div>
 
@@ -48,8 +65,8 @@ function Leaderboard() {
         ))}
       </div>
 
-      <div className="hud-panel w-full max-w-2xl overflow-hidden">
-        <table className="w-full text-left">
+      <div className="hud-panel w-full max-w-2xl overflow-x-auto">
+        <table className="w-full min-w-[560px] text-left">
           <thead>
             <tr className="border-b border-ink/10 text-ink/60 font-arcade text-[0.55rem] tracking-wider">
               <th className="px-4 py-3">#</th>
@@ -61,7 +78,7 @@ function Leaderboard() {
           </thead>
           <tbody>
             {rows.map((entry, idx) => {
-              const rowIndex = demoLeaderboard.findIndex(
+              const rowIndex = rows.findIndex(
                 (e) => e.id === entry.id
               );
               const isMe =
@@ -72,7 +89,7 @@ function Leaderboard() {
                   key={entry.id}
                   className={`border-b border-ink/10 last:border-0 ${
                     isMe
-                      ? "bg-aqua/15"
+                      ? "bg-[#e9e5da]"
                       : idx % 2
                       ? "bg-transparent"
                       : "bg-black/[0.04]"
@@ -99,7 +116,7 @@ function Leaderboard() {
                     <span
                       className={`inline-block text-[0.6rem] font-arcade px-2 py-1 rounded-md ${
                         entry.game === "Tile"
-                          ? "bg-xp-blue/15 text-xp-blue"
+                          ? "bg-[#e9e5da] text-ink"
                           : "bg-ink/10 text-ink/70"
                       }`}
                     >
@@ -113,10 +130,10 @@ function Leaderboard() {
                 </tr>
               );
             })}
-            {rows.length === 0 && (
+            {(loading || error || rows.length === 0) && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-ink/60">
-                  No entries yet.
+                  {loading ? "Loading rankings..." : error ?? "No entries yet. Be the first to play."}
                 </td>
               </tr>
             )}

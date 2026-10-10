@@ -1,18 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { usePlayer } from "./PlayerProvider";
+import SiteHeader from "./SiteHeader";
 
 const MAX_LIVES = 3;
 const TILE_SOUNDS = 12;
-const CLEAR_DELAY = 650;
+const CLEAR_DELAY = 850;
 
 const CONFETTI_COLORS = [
-  "#ffd93b",
-  "#ff595e",
-  "#57c785",
-  "#4fb0e0",
-  "#59f3e0",
-  "#c77dff",
+  "#171715",
+  "#6d6558",
+  "#b8aa90",
+  "#d8ceb9",
 ];
 
 type Popup = {
@@ -75,6 +75,7 @@ function Confetti({ seed }: { seed: number }) {
 /*  Main game                                                          */
 /* ------------------------------------------------------------------ */
 function TileGame() {
+  const { submitScore, scoreError } = usePlayer();
   const [level, setLevel] = useState(1);
   const [cols, setCols] = useState(3);
   const [randomArr, setRandomArr] = useState<number[]>([]);
@@ -276,10 +277,12 @@ function TileGame() {
 
     // Correct tile
     playTileSound(tileId, combo);
+    const isFinalTile = userInputArr.length + 1 === randomArrRef.current.length;
     target.classList.add("tap-green", "press-pop");
+    if (isFinalTile) target.classList.add("final-hit");
     setTimeout(
-      () => target.classList.remove("tap-green", "press-pop"),
-      400
+      () => target.classList.remove("tap-green", "press-pop", "final-hit"),
+      isFinalTile ? CLEAR_DELAY + 150 : 400
     );
 
     const newCombo = combo + 1;
@@ -289,9 +292,10 @@ function TileGame() {
     setMaxCombo((m) => Math.max(m, newCombo));
     setScore(newScore);
     setHighscore((h) => Math.max(h, newScore));
-    showPopup(cx, cy - 10, `+${points}`, "#139bc4");
+    if (newScore > highscore) void submitScore("Tile", newScore, level);
+    showPopup(cx, cy - 10, `+${points}`, "#26734f");
     if (newCombo >= 3) {
-      showPopup(cx, cy + 18, `x${newCombo}`, "#0a8ea8");
+      showPopup(cx, cy + 18, `x${newCombo}`, "#26734f");
     }
 
     setUserInputArr((prev) => [...prev, tileId]);
@@ -311,6 +315,7 @@ function TileGame() {
       setScore(totalScore);
       setHighscore((h) => Math.max(h, totalScore));
       setMaxCombo((m) => Math.max(m, comboRef.current));
+      void submitScore("Tile", totalScore, clearedLevel);
 
       if (soundOnRef.current) winAudio.current?.play().catch(() => undefined);
       setConfettiKey((k) => k + 1);
@@ -340,7 +345,7 @@ function TileGame() {
         clearTimeout(nextTimer);
       };
     }
-  }, [userInputArr, randomArr, animatePrevTiles, animateNextTile]);
+  }, [userInputArr, randomArr, animatePrevTiles, animateNextTile, submitScore]);
 
   /* ------------------------------------------------------------------ */
   /*  Tile size by grid                                                  */
@@ -361,7 +366,7 @@ function TileGame() {
   /*  Render                                                             */
   /* ------------------------------------------------------------------ */
   return (
-    <div className="relative min-h-screen min-w-screen p-6 md:p-12 flex flex-col justify-center items-center gap-8 z-10">
+    <div className="game-stage relative min-h-screen min-w-screen p-6 md:p-12 flex flex-col justify-center items-center gap-8 z-10">
       {confettiKey > 0 && <Confetti seed={confettiKey} />}
 
       {/* Floating score popups */}
@@ -437,7 +442,7 @@ function TileGame() {
                   i === lives - 1 && lives < MAX_LIVES ? "lose-pop" : ""
                 }`}
               >
-                ❤️
+                  ♥
               </span>
             ))}
           </div>
@@ -468,7 +473,7 @@ function TileGame() {
         </div>
         {combo >= 2 && (
           <div className="combo-badge text-sm md:text-lg whitespace-nowrap animate-pulse">
-            ✦ {combo}x COMBO
+            ✳ {combo}x COMBO
           </div>
         )}
         <button
@@ -476,20 +481,20 @@ function TileGame() {
           title={soundOn ? "Mute" : "Unmute"}
           className="glass-btn rounded-lg w-11 h-11 flex items-center justify-center text-lg cursor-pointer shrink-0"
         >
-          {soundOn ? "🔊" : "🔇"}
+          {soundOn ? "♪" : "♪̸"}
         </button>
         <button
           onClick={openMenu}
           className="glass-btn rounded-lg w-11 h-11 flex items-center justify-center text-lg cursor-pointer shrink-0"
         >
-          ⚙️
+          ☰
         </button>
       </div>
 
       {/* ---------------- Grid ---------------- */}
       <div
         ref={gridRef}
-        className="relative hud-panel keypad-well grid gap-2.5 p-3 md:p-5 place-items-center z-20"
+          className="relative hud-panel keypad-well game-board grid gap-2.5 p-3 md:p-5 place-items-center z-20"
         style={{
           gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
           width: "min(90vw, max-content)",
@@ -509,8 +514,10 @@ function TileGame() {
 
       {/* ---------------- Menu overlay ---------------- */}
       {menuOpen && (
-        <aside className="absolute bg-[#ece4cd]/90 backdrop-blur-xl min-h-screen min-w-full top-0 left-0 z-40 flex flex-col items-center justify-center px-4 py-20 text-center slide-overlay">
-          <h1 className="neon-title text-xl md:text-4xl leading-relaxed">
+        <aside className="absolute bg-[#f6f4ee]/95 backdrop-blur-xl min-h-screen min-w-full top-0 left-0 z-40 flex flex-col items-center justify-center px-4 py-28 md:py-20 text-center slide-overlay">
+          <div className="absolute top-0 inset-x-0 z-50 text-left"><SiteHeader /></div>
+          <span className="section-index mb-5">01 / VISUAL MEMORY</span>
+          <h1 className="neon-title text-4xl md:text-6xl leading-relaxed">
             CAN YOU
             <br />
             REMEMBER?
@@ -554,7 +561,7 @@ function TileGame() {
             <button
               id="start-btn"
               onClick={startNewGame}
-              className="xp-btn text-xl md:text-2xl font-arcade w-fit py-3 px-8"
+              className="xp-btn text-sm font-arcade w-full py-4 px-8"
             >
               ▶ START
             </button>
@@ -573,7 +580,7 @@ function TileGame() {
 
       {/* ---------------- Game over overlay ---------------- */}
       {gameOver && (
-        <aside className="absolute bg-[#ece4cd]/92 backdrop-blur-xl min-h-screen min-w-full top-0 left-0 z-40 flex flex-col items-center justify-center px-4 text-center gameover-in">
+        <aside className="absolute bg-[#f6f4ee]/95 backdrop-blur-xl min-h-screen min-w-full top-0 left-0 z-40 flex flex-col items-center justify-center px-4 text-center gameover-in">
           <h2 className="font-arcade text-3xl md:text-5xl text-glow-red">
             GAME OVER
           </h2>
@@ -609,12 +616,19 @@ function TileGame() {
                 ★ NEW HIGH SCORE ★
               </div>
             )}
+            {scoreError && <p role="alert" className="feedback-wrong text-xs">{scoreError}</p>}
             <button
               onClick={startNewGame}
               className="xp-btn text-lg font-arcade w-fit py-3 px-8 mt-2"
             >
               ↻ PLAY AGAIN
             </button>
+            <Link
+              href="/leaderboard"
+              className="leaderboard-fire-btn font-arcade text-xs px-6 py-3 no-underline"
+            >
+              <span>VIEW LEADERBOARD ↗</span>
+            </Link>
             <button
               onClick={openMenu}
               className="text-ink/60 hover:text-ink underline underline-offset-4 text-xs font-arcade cursor-pointer mt-1"

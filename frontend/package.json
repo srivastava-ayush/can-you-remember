@@ -1,5 +1,5 @@
 {
-  "name": "can-you-remember",
+  "name": "@cyr/frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -24,8 +24,5 @@
     "eslint-config-next": "^16.3.6",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.6.2"
-  },
-  "allowScripts": {
-    "unrs-resolver@1.12.2": true
   }
 }
